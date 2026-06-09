@@ -80,7 +80,8 @@ DEFAULT_SCRIPT = (
     "Как я могу к вам обращаться? ✨"
 )
 
-_last_send_time: float = 0.0
+_daily_count: int = 0
+_daily_reset_date: str = ""
 
 
 def make_client():
@@ -156,13 +157,15 @@ def send():
     global _last_send_time
     data = request.get_json(force=True) or {}
 
-    elapsed = time.time() - _last_send_time
-    if _last_send_time > 0 and elapsed < MIN_INTERVAL:
-        wait = int(MIN_INTERVAL - elapsed)
+    msk_today = datetime.now(timezone(timedelta(hours=3))).strftime("%Y-%m-%d")
+    if _daily_reset_date != msk_today:
+        _daily_count = 0
+        _daily_reset_date = msk_today
+    if _daily_count >= DAILY_LIMIT:
         return jsonify({
             "queued": True,
-            "wait_seconds": wait,
-            "message": f"Rate limit: следующая отправка через {wait//60} мин {wait%60} сек"
+            "wait_seconds": 0,
+            "message": f"Дневной лимит {DAILY_LIMIT} сообщений исчерпан. Обновится в полночь по МСК."
         }), 429
 
     name        = data.get("name", "")
@@ -185,16 +188,20 @@ def send():
         loop.close()
 
     if result.get("sent"):
-        _last_send_time = time.time()
+        _daily_count += 1
 
     return jsonify(result)
 
 
 @app.route("/health")
 def health():
-    last = int(_last_send_time)
-    wait = max(0, MIN_INTERVAL - int(time.time() - _last_send_time)) if last else 0
-    return jsonify({"status": "ok", "last_send_unix": last, "next_available_in_sec": wait})
+    msk_today = datetime.now(timezone(timedelta(hours=3))).strftime("%Y-%m-%d")
+    return jsonify({
+        "status": "ok",
+        "daily_limit": DAILY_LIMIT,
+        "daily_sent": _daily_count if _daily_reset_date == msk_today else 0,
+        "daily_remaining": max(0, DAILY_LIMIT - (_daily_count if _daily_reset_date == msk_today else 0))
+    })
 
 
 if __name__ == "__main__":

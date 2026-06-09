@@ -11,6 +11,7 @@ load_dotenv()
 from datetime import datetime, timezone, timedelta
 from flask import Flask, request, jsonify
 from pyrogram import Client
+from pyrogram.types import InputPhoneContact
 from pyrogram.errors import (
     FloodWait, UserPrivacyRestricted, PeerIdInvalid,
     UsernameNotOccupied, UsernameInvalid, PhoneNumberInvalid,
@@ -109,9 +110,11 @@ async def _find_and_send(name: str, phone: str, tg_username: str, message: str) 
 
         if not target and phone:
             clean = phone.replace(" ", "").replace("-", "")
+            if not clean.startswith("+"):
+                clean = "+" + clean
             try:
                 res = await client.import_contacts([
-                    {"phone_number": clean, "first_name": name or "Lead", "last_name": ""}
+                    InputPhoneContact(phone=clean, first_name=name or "Lead", last_name="")
                 ])
                 if res.imported:
                     uid = res.imported[0].user_id

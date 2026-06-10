@@ -24,9 +24,7 @@ API_ID          = int(os.getenv("TG_API_ID", "0"))
 API_HASH        = os.getenv("TG_API_HASH", "")
 SESSION_STRING  = os.getenv("TG_SESSION_STRING", "")  # строка сессии для сервера
 SESSION_FILE    = os.getenv("TG_SESSION", "lead_session")  # файл для локального запуска
-MIN_INTERVAL    = int(os.getenv("TG_MIN_INTERVAL", "1800"))
 PORT            = int(os.getenv("PORT", "5001"))
-DAILY_LIMIT     = int(os.getenv("TG_DAILY_LIMIT", "20"))
 DAILY_LIMIT     = int(os.getenv("TG_DAILY_LIMIT", "20"))
 
 

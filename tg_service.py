@@ -26,6 +26,7 @@ SESSION_STRING  = os.getenv("TG_SESSION_STRING", "")  # строка сесси�
 SESSION_FILE    = os.getenv("TG_SESSION", "lead_session")  # файл для локального запуска
 MIN_INTERVAL    = int(os.getenv("TG_MIN_INTERVAL", "1800"))
 PORT            = int(os.getenv("PORT", "5001"))
+DAILY_LIMIT     = int(os.getenv("TG_DAILY_LIMIT", "20"))
 
 
 def get_greeting() -> str:
@@ -154,7 +155,7 @@ async def _find_and_send(name: str, phone: str, tg_username: str, message: str) 
 
 @app.route("/send", methods=["POST"])
 def send():
-    global _last_send_time
+    global _daily_count, _daily_reset_date
     data = request.get_json(force=True) or {}
 
     msk_today = datetime.now(timezone(timedelta(hours=3))).strftime("%Y-%m-%d")

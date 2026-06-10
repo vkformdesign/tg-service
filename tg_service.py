@@ -27,6 +27,7 @@ SESSION_FILE    = os.getenv("TG_SESSION", "lead_session")  # файл для л�
 MIN_INTERVAL    = int(os.getenv("TG_MIN_INTERVAL", "1800"))
 PORT            = int(os.getenv("PORT", "5001"))
 DAILY_LIMIT     = int(os.getenv("TG_DAILY_LIMIT", "20"))
+DAILY_LIMIT     = int(os.getenv("TG_DAILY_LIMIT", "20"))
 
 
 def get_greeting() -> str:
